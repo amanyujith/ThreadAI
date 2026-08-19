@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MessageType {
+  RECEIVED
+  SENT
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages     Message[]
+  memory       WorkspaceMemory?
+}
+
+model Message {
+  id            String      @id @default(cuid())
+  sender        String?
+  content       String
+  type          MessageType
+  isAiGenerated Boolean     @default(false)
+
+  workspaceId   String
+  workspace      Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model WorkspaceMemory {
+  id          String   @id @default(cuid())
+
+  workspaceId String   @unique
+
+  summary     Json?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
